@@ -14,6 +14,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
+import java.util.concurrent.TimeUnit;
+
 import static com.example.demo.security.ApplicationUserRole.*;
 import static org.springframework.http.HttpMethod.GET;
 
@@ -33,34 +35,41 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers(GET, "/", "index", "/css/*", "/js/*")
                 .permitAll()
-                .antMatchers(GET,"/students/**").hasRole(STUDENT.name())
+                .antMatchers(GET, "/students/**").hasRole(STUDENT.name())
                 .anyRequest().authenticated()
                 .and()
-                .httpBasic();
+                .formLogin()
+                .loginPage("/login").permitAll()
+                .defaultSuccessUrl("/courses", true)
+                .and()
+                .rememberMe()
+                .tokenValiditySeconds((int) TimeUnit.DAYS.toSeconds(21))
+                .key("ueierfhwufhuiwrygi5g86");
+
     }
 
     @Override
     @Bean
-    protected UserDetailsService userDetailsService( ) {
+    protected UserDetailsService userDetailsService() {
         UserDetails poxos = User.builder()
                 .username("poxos")
                 .password(passwordEncoder.encode("root"))
                 .authorities(STUDENT.grantedAuthorities())
-               // .roles(STUDENT.name())
+                // .roles(STUDENT.name())
                 .build();
 
         UserDetails petros = User.builder()
                 .username("petros")
                 .password(passwordEncoder.encode("root"))
                 .authorities(ADMIN.grantedAuthorities())
-             //   .roles(ADMIN.name())
+                //   .roles(ADMIN.name())
                 .build();
 
         UserDetails armen = User.builder()
                 .username("armen")
                 .password(passwordEncoder.encode("root"))
                 .authorities(ADMINTRAINEE.grantedAuthorities())
-              //  .roles(ADMINTRAINEE.name())
+                //  .roles(ADMINTRAINEE.name())
                 .build();
 
         return new InMemoryUserDetailsManager(
