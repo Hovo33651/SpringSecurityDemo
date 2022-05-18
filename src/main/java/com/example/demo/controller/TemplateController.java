@@ -18,4 +18,6 @@ public class TemplateController {
         return "courses";
     }
 
+
+
 }
